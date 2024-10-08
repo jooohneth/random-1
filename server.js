@@ -62,6 +62,10 @@ const main = async () => {
     }
   });
 
+  app.use((req, res, next) => {
+    res.status(404).sendFile(path.join(__dirname, "/views/404.html"));
+  });
+
   // app.get("/solutions/projects/sector-demo", async (req, res) => {
   //   try {
   //     res.send(await projectData.getProjectsBySector("ind"));
