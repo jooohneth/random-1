@@ -39,7 +39,6 @@ const main = async () => {
       const sector = req.query.sector;
       if (sector) {
         const projectsBySector = await projectData.getProjectsBySector(sector);
-        throw new Error(sector);
         res.json(projectsBySector);
       } else {
         const allProjects = await projectData.getAllProjects();
