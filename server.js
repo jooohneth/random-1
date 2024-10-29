@@ -14,24 +14,38 @@ const projectData = require("./modules/projects");
 const express = require("express");
 const path = require("path");
 
-const app = express();
+const app = express(); // constructor
 const HTTP_PORT = 3000;
+
+function randomDeny(req, res, next) {
+  let allowed = Math.floor(Math.random() * 2); // 0 or 1
+
+  if (allowed) {
+    next();
+  } else {
+    res.status(403).send("Access Denied");
+  }
+}
 
 const main = async () => {
   await projectData.Initialize();
 
-  app.listen(HTTP_PORT, () =>
-    console.log(`listening: http://localhost:${HTTP_PORT}/`)
-  );
-
   app.use(express.static(path.join(__dirname, "/public")));
 
+  // app.use((req, res, next) => {
+  //   console.log(`Request from: ${req.get("user-agent")} [${new Date()}]`);
+  //   next();
+  // });
+
+  app.set("view engine", "ejs");
+
   app.get("/", (req, res) => {
-    res.sendFile(path.join(__dirname, "/views/home.html"));
+    res.render("home");
   });
 
-  app.get("/about", (req, res) => {
-    res.sendFile(path.join(__dirname, "/views/about.html"));
+  app.get("/about", randomDeny, (req, res) => {
+    res.render("about");
+    // res.redirect("https://blog.blast.io/vision/");
   });
 
   app.get("/solutions/projects", async (req, res) => {
@@ -45,7 +59,7 @@ const main = async () => {
         res.json(allProjects);
       }
     } catch (error) {
-      res.status(404).sendFile(path.join(__dirname, "/views/404.html"));
+      res.status(404).render("404");
     }
   });
 
@@ -58,13 +72,17 @@ const main = async () => {
       }
       res.json(project);
     } catch (error) {
-      res.status(404).sendFile(path.join(__dirname, "/views/404.html"));
+      res.status(404).render("404");
     }
   });
 
   app.use((req, res, next) => {
-    res.status(404).sendFile(path.join(__dirname, "/views/404.html"));
+    res.status(404).render("404");
   });
+
+  app.listen(HTTP_PORT, () =>
+    console.log(`listening: http://localhost:${HTTP_PORT}/`)
+  );
 
   // app.get("/solutions/projects/sector-demo", async (req, res) => {
   //   try {
