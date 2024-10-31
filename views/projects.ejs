@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Projects</title>
+    <link href="/css/main.css" rel="stylesheet" />
+  </head>
+  <body class="min-h-screen pb-10">
+    <%- include("partials/navbar", { page: "/solutions/projects"}) %>
+
+    <div class="container mx-auto min-h-32 mb-10">
+      <div class="hero bg-base-300 p-12 shadow-lg rounded-lg">
+        <div class="hero-content text-center">
+          <div class="max-w-md flex flex-col justify-center items-center gap-4">
+            <h1 class="text-5xl font-bold">Projects</h1>
+            <p class="py-6">
+              Browse some random projects from our random database of project
+              solutions.
+            </p>
+            <div class="flex gap-2">
+              <button
+                class="btn btn-primary"
+                onclick="window.location.href='/solutions/projects?sector=Industry'"
+              >
+                Industry
+              </button>
+              <button
+                class="btn btn-primary"
+                onclick="window.location.href='/solutions/projects?sector=Transportation'"
+              >
+                Transportation
+              </button>
+              <button
+                class="btn btn-primary"
+                onclick="window.location.href='/solutions/projects?sector=Electricity'"
+              >
+                Electricity
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="container mx-auto overflow-x-auto">
+      <table class="table">
+        <!-- head -->
+        <thead>
+          <tr>
+            <th>Title</th>
+            <th>Sector</th>
+            <th>Description</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% projects.forEach(project => { %>
+          <tr>
+            <td><%= project.title %></td>
+            <td>
+              <button
+                class="btn btn-sm btn-primary"
+                onclick="window.location.href='/solutions/projects/?sector=<%= project.sector %>'"
+              >
+                <%= project.sector %>
+              </button>
+            </td>
+            <td><%= project.summary_short %></td>
+            <td>
+              <button
+                class="btn btn-primary btn-sm"
+                onclick="window.location.href='/solutions/projects/<%= project.id %>'"
+              >
+                Details
+              </button>
+            </td>
+          </tr>
+          <% }); %>
+        </tbody>
+      </table>
+    </div>
+  </body>
+</html>

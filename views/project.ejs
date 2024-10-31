@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>About</title>
+    <link href="/css/main.css" rel="stylesheet" />
+  </head>
+  <body class="min-h-screen pb-10">
+    <%- include("partials/navbar", { page: "" }) %>
+
+    <div class="container mx-auto min-h-32 mb-10">
+      <div class="hero bg-base-300 p-12 shadow-lg rounded-lg">
+        <div class="hero-content text-center">
+          <div class="max-w-md">
+            <h1 class="text-5xl font-bold"><%- project.title %></h1>
+            <p class="py-6">
+              Below you'll find not so useful information about a project
+              called: <span class="underline"><%- project.title %></span>
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="container mx-auto">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <figure>
+          <img src="<%- project.feature_img_url %>" alt="Blast" />
+        </figure>
+        <div>
+          <div class="font-bold"><%- project.intro_short %></div>
+          <p class="pt-6"><%- project.impact %></p>
+          <p class="pt-6">
+            More Information:
+            <a href="<%- project.original_source_url %>">
+              <span class="underline"
+                ><%- project.original_source_url %></span
+              ></a
+            >
+          </p>
+          <blockquote class="pt-6">
+            <p id="quote" class="italic">"Loading quote..."</p>
+            <footer id="author" class="text-right">- Loading author...</footer>
+          </blockquote>
+          <div class="flex justify-center pt-6">
+            <button
+              class="btn btn-primary px-20"
+              onclick="window.history.back(); return false"
+            >
+              Return
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script>
+      document.addEventListener("DOMContentLoaded", async () => {
+        try {
+          const response = await fetch("https://dummyjson.com/quotes/random");
+          const data = await response.json();
+          const { author, quote } = data;
+
+          // Assuming you have elements with these IDs in your EJS template
+          document.getElementById("quote").textContent = `"${quote}"`;
+          document.getElementById("author").textContent = `~ ${author}`;
+        } catch (err) {
+          console.error("Error fetching quote:", err);
+        }
+      });
+    </script>
+  </body>
+</html>
