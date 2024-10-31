@@ -52,7 +52,7 @@ const getProjectsBySector = async (sector) => {
     const projectsBySector = projects.filter((project) =>
       project.sector.toLowerCase().includes(sector.toLowerCase())
     );
-    if (projectsBySector) {
+    if (projectsBySector.length > 0) {
       resolve(projectsBySector);
     } else {
       reject(new Error("Projects not found"));
