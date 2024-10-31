@@ -17,33 +17,19 @@ const path = require("path");
 const app = express(); // constructor
 const HTTP_PORT = 3000;
 
-function randomDeny(req, res, next) {
-  let allowed = Math.floor(Math.random() * 2); // 0 or 1
-
-  if (allowed) {
-    next();
-  } else {
-    res.status(403).send("Access Denied");
-  }
-}
-
 const main = async () => {
   await projectData.Initialize();
 
   app.use(express.static(path.join(__dirname, "/public")));
 
-  // app.use((req, res, next) => {
-  //   console.log(`Request from: ${req.get("user-agent")} [${new Date()}]`);
-  //   next();
-  // });
-
   app.set("view engine", "ejs");
+  app.set("views", __dirname + "/views");
 
   app.get("/", (req, res) => {
     res.render("home");
   });
 
-  app.get("/about", randomDeny, (req, res) => {
+  app.get("/about", (req, res) => {
     res.render("about");
     // res.redirect("https://blog.blast.io/vision/");
   });
@@ -51,15 +37,18 @@ const main = async () => {
   app.get("/solutions/projects", async (req, res) => {
     try {
       const sector = req.query.sector;
-      if (sector) {
-        const projectsBySector = await projectData.getProjectsBySector(sector);
-        res.json(projectsBySector);
-      } else {
-        const allProjects = await projectData.getAllProjects();
-        res.json(allProjects);
+
+      if (!sector) {
+        const projects = await projectData.getAllProjects();
+        return res.render("projects", { projects });
       }
+
+      const projectsBySector = await projectData.getProjectsBySector(sector);
+      res.render("projects", { projects: projectsBySector });
     } catch (error) {
-      res.status(404).render("404");
+      res
+        .status(404)
+        .render("404", { message: `No projects found for this sector.` });
     }
   });
 
@@ -67,17 +56,19 @@ const main = async () => {
     try {
       const projectId = parseInt(req.params.id);
       const project = await projectData.getProjectsById(projectId);
-      if (!project) {
-        throw new Error("Project not found");
-      }
-      res.json(project);
+
+      res.render("project", { project });
     } catch (error) {
-      res.status(404).render("404");
+      res
+        .status(404)
+        .render("404", { message: "Unable to find requested project." });
     }
   });
 
   app.use((req, res, next) => {
-    res.status(404).render("404");
+    res.status(404).render("404", {
+      message: "I'm sorry, we're unable to find what you're looking for.",
+    });
   });
 
   app.listen(HTTP_PORT, () =>
