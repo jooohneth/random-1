@@ -35,9 +35,9 @@ const main = async () => {
   });
 
   app.get("/solutions/projects", async (req, res) => {
-    try {
-      const sector = req.query.sector;
+    const sector = req.query.sector;
 
+    try {
       if (!sector) {
         const projects = await projectData.getAllProjects();
         return res.render("projects", { projects });
@@ -48,7 +48,9 @@ const main = async () => {
     } catch (error) {
       res
         .status(404)
-        .render("404", { message: `No projects found for this sector.` });
+        .render("404", {
+          message: `No projects found for this sector: ${sector}`,
+        });
     }
   });
 
