@@ -21,6 +21,7 @@ const main = async () => {
   await projectData.Initialize();
 
   app.use(express.static(path.join(__dirname, "/public")));
+  app.use(express.urlencoded({ extended: true }));
 
   app.set("view engine", "ejs");
   app.set("views", __dirname + "/views");
@@ -46,11 +47,9 @@ const main = async () => {
       const projectsBySector = await projectData.getProjectsBySector(sector);
       res.render("projects", { projects: projectsBySector });
     } catch (error) {
-      res
-        .status(404)
-        .render("404", {
-          message: `No projects found for this sector: ${sector}`,
-        });
+      res.status(404).render("404", {
+        message: `No projects found for this sector: ${sector}`,
+      });
     }
   });
 
@@ -64,6 +63,63 @@ const main = async () => {
       res
         .status(404)
         .render("404", { message: "Unable to find requested project." });
+    }
+  });
+
+  app.get("/solutions/addProject", async (req, res) => {
+    try {
+      const sectors = await projectData.getAllSectors();
+
+      res.render("addProject", { sectors: sectors });
+    } catch (error) {
+      res.status(404).render("404", { message: "Unable to add project." });
+    }
+  });
+
+  app.post("/solutions/addProject", async (req, res) => {
+    try {
+      await projectData.addProject(req.body);
+      res.redirect("/solutions/projects");
+    } catch (error) {
+      res.render("500", { message: "Unable to add project.  " });
+    }
+  });
+
+  app.get("/solutions/editProject/:id", async (req, res) => {
+    try {
+      const projectId = parseInt(req.params.id);
+      const [project, sectors] = await Promise.all([
+        projectData.getProjectsById(projectId),
+        projectData.getAllSectors(),
+      ]);
+
+      res.render("editProject", { sectors: sectors, project: project });
+    } catch (error) {
+      res
+        .status(404)
+        .render("404", { message: "Unable to find requested project." });
+    }
+  });
+
+  app.post("/solutions/editProject", async (req, res) => {
+    try {
+      await projectData.editProject(req.body.id, req.body);
+      res.redirect("/solutions/projects");
+    } catch (error) {
+      res.render("500", {
+        message: `I'm sorry, but we have encountered the following error: ${error}`,
+      });
+    }
+  });
+
+  app.get("/solutions/deleteProject/:id", async (req, res) => {
+    try {
+      await projectData.deleteProject(req.params.id);
+      res.redirect("/solutions/projects");
+    } catch (error) {
+      res.render("500", {
+        message: `I'm sorry, but we have encountered the following error: ${error}`,
+      });
     }
   });
 

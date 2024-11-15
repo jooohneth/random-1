@@ -61,9 +61,9 @@
             <td>
               <button
                 class="btn btn-sm btn-primary"
-                onclick="window.location.href='/solutions/projects/?sector=<%= project.sector %>'"
+                onclick="window.location.href='/solutions/projects/?sector=<%= project.Sector.sector_name %>'"
               >
-                <%= project.sector %>
+                <%= project.Sector.sector_name %>
               </button>
             </td>
             <td><%= project.summary_short %></td>
