@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login</title>
+    <link href="/css/main.css" rel="stylesheet" />
+  </head>
+  <body>
+    <%- include("partials/navbar", { page: "/login"}) %>
+
+    <div class="container mx-auto min-h-32 mb-10">
+      <div class="hero bg-base-300 p-12 shadow-lg rounded-lg">
+        <div class="hero-content text-center">
+          <div class="max-w-md flex flex-col justify-center items-center gap-4">
+            <h1 class="text-5xl font-bold">Login</h1>
+            <p class="py-6">Please provide your credentials below</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <form
+      action="/login"
+      method="post"
+      class="max-w-2xl mx-auto mt-8 p-6 bg-base-200 rounded-lg shadow-lg"
+    >
+      <div class="form-control w-full">
+        <label for="userName">Username</label>
+        <input
+          type="text"
+          class="input input-bordered w-full"
+          name="userName"
+          placeholder="Username"
+          required
+          value="<%= userName %>"
+        />
+      </div>
+      <div class="form-control w-full mt-4">
+        <label for="password">Password</label>
+        <input
+          type="password"
+          name="password"
+          placeholder="Password"
+          required
+          class="input input-bordered w-full"
+        />
+      </div>
+      <div class="mt-6 flex justify-center items-center">
+        <button type="submit" class="btn btn-primary px-10">Login</button>
+      </div>
+    </form>
+
+    <% if(errorMessage) { %>
+    <div class="alert alert-error max-w-2xl mx-auto mt-8 rounded-lg shadow-lg">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        class="stroke-current shrink-0 h-6 w-6"
+        fill="none"
+        viewBox="0 0 24 24"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
+        />
+      </svg>
+
+      <span><%= errorMessage %></span>
+    </div>
+    <% } %>
+  </body>
+</html>

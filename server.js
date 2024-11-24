@@ -13,15 +13,48 @@
 const projectData = require("./modules/projects");
 const express = require("express");
 const path = require("path");
+const clientSessions = require("client-sessions");
 
 const app = express(); // constructor
 const HTTP_PORT = 3000;
 
+const authData = require("./modules/auth-service");
+
 const main = async () => {
-  await projectData.Initialize();
+  try {
+    await projectData.Initialize();
+    await authData.Initialize();
+
+    app.listen(HTTP_PORT, () =>
+      console.log(`listening: http://localhost:${HTTP_PORT}/`)
+    );
+  } catch (err) {
+    console.log(`unable to start server: ${err}`);
+  }
 
   app.use(express.static(path.join(__dirname, "/public")));
   app.use(express.urlencoded({ extended: true }));
+
+  app.use(
+    clientSessions({
+      cookieName: "session",
+      secret: process.env.SECRET,
+      duration: 2 * 60 * 1000, // duration of the session in milliseconds (2 minutes)
+      activeDuration: 1000 * 60, // the session will be extended by this many ms each request (1 minute)
+    })
+  );
+  app.use((req, res, next) => {
+    res.locals.session = req.session;
+    next();
+  });
+
+  const ensureLogin = (req, res, next) => {
+    if (!req.session.user) {
+      res.redirect("/login");
+    } else {
+      next();
+    }
+  };
 
   app.set("view engine", "ejs");
   app.set("views", __dirname + "/views");
@@ -66,7 +99,7 @@ const main = async () => {
     }
   });
 
-  app.get("/solutions/addProject", async (req, res) => {
+  app.get("/solutions/addProject", ensureLogin, async (req, res) => {
     try {
       const sectors = await projectData.getAllSectors();
 
@@ -76,7 +109,7 @@ const main = async () => {
     }
   });
 
-  app.post("/solutions/addProject", async (req, res) => {
+  app.post("/solutions/addProject", ensureLogin, async (req, res) => {
     try {
       await projectData.addProject(req.body);
       res.redirect("/solutions/projects");
@@ -85,7 +118,7 @@ const main = async () => {
     }
   });
 
-  app.get("/solutions/editProject/:id", async (req, res) => {
+  app.get("/solutions/editProject/:id", ensureLogin, async (req, res) => {
     try {
       const projectId = parseInt(req.params.id);
       const [project, sectors] = await Promise.all([
@@ -101,7 +134,7 @@ const main = async () => {
     }
   });
 
-  app.post("/solutions/editProject", async (req, res) => {
+  app.post("/solutions/editProject", ensureLogin, async (req, res) => {
     try {
       await projectData.editProject(req.body.id, req.body);
       res.redirect("/solutions/projects");
@@ -112,7 +145,7 @@ const main = async () => {
     }
   });
 
-  app.get("/solutions/deleteProject/:id", async (req, res) => {
+  app.get("/solutions/deleteProject/:id", ensureLogin, async (req, res) => {
     try {
       await projectData.deleteProject(req.params.id);
       res.redirect("/solutions/projects");
@@ -123,15 +156,74 @@ const main = async () => {
     }
   });
 
+  app.get("/login", (req, res) => {
+    res.render("login", {
+      errorMessage: "",
+      userName: "",
+    });
+  });
+
+  app.post("/login", async (req, res) => {
+    req.body.userAgent = req.get("User-Agent");
+    try {
+      let user = await authData.checkUser(req.body);
+      const { userName, email, loginHistory } = user;
+
+      req.session.user = {
+        userName,
+        email,
+        loginHistory,
+      };
+
+      res.redirect("/solutions/projects");
+    } catch (err) {
+      res.render("login", {
+        errorMessage: err,
+        userName: req.body.userName,
+      });
+    }
+  });
+
+  app.get("/register", (req, res) => {
+    res.render("register", {
+      errorMessage: "",
+      successMessage: "",
+      userName: "",
+    });
+  });
+
+  app.post("/register", async (req, res) => {
+    try {
+      await authData.registerUser(req.body);
+
+      res.render("register", {
+        errorMessage: "",
+        successMessage: "User created",
+        userName: "",
+      });
+    } catch (err) {
+      res.render("register", {
+        errorMessage: err,
+        successMessage: "",
+        userName: req.body.userName,
+      });
+    }
+  });
+
+  app.get("/logout", (req, res) => {
+    req.session.reset();
+    res.redirect("/");
+  });
+
+  app.get("/userHistory", ensureLogin, (req, res) => {
+    res.render("userHistory");
+  });
+
   app.use((req, res, next) => {
     res.status(404).render("404", {
       message: "I'm sorry, we're unable to find what you're looking for.",
     });
   });
-
-  app.listen(HTTP_PORT, () =>
-    console.log(`listening: http://localhost:${HTTP_PORT}/`)
-  );
 
   // app.get("/solutions/projects/sector-demo", async (req, res) => {
   //   try {
