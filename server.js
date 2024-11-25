@@ -20,10 +20,37 @@ const HTTP_PORT = 3000;
 
 const authData = require("./modules/auth-service");
 
+const ensureLogin = (req, res, next) => {
+  if (!req.session.user) {
+    res.redirect("/login");
+  } else {
+    next();
+  }
+};
+
 const main = async () => {
   try {
     await projectData.Initialize();
     await authData.Initialize();
+
+    app.set("view engine", "ejs");
+    app.set("views", __dirname + "/views");
+
+    app.use(express.static(path.join(__dirname, "/public")));
+    app.use(express.urlencoded({ extended: true }));
+
+    app.use(
+      clientSessions({
+        cookieName: "session",
+        secret: process.env.SECRET,
+        duration: 2 * 60 * 1000, // duration of the session in milliseconds (2 minutes)
+        activeDuration: 1000 * 60, // the session will be extended by this many ms each request (1 minute)
+      })
+    );
+    app.use((req, res, next) => {
+      res.locals.session = req.session;
+      next();
+    });
 
     app.listen(HTTP_PORT, () =>
       console.log(`listening: http://localhost:${HTTP_PORT}/`)
@@ -31,33 +58,6 @@ const main = async () => {
   } catch (err) {
     console.log(`unable to start server: ${err}`);
   }
-
-  app.use(express.static(path.join(__dirname, "/public")));
-  app.use(express.urlencoded({ extended: true }));
-
-  app.use(
-    clientSessions({
-      cookieName: "session",
-      secret: process.env.SECRET,
-      duration: 2 * 60 * 1000, // duration of the session in milliseconds (2 minutes)
-      activeDuration: 1000 * 60, // the session will be extended by this many ms each request (1 minute)
-    })
-  );
-  app.use((req, res, next) => {
-    res.locals.session = req.session;
-    next();
-  });
-
-  const ensureLogin = (req, res, next) => {
-    if (!req.session.user) {
-      res.redirect("/login");
-    } else {
-      next();
-    }
-  };
-
-  app.set("view engine", "ejs");
-  app.set("views", __dirname + "/views");
 
   app.get("/", (req, res) => {
     res.render("home");
