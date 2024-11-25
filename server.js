@@ -16,7 +16,7 @@ const path = require("path");
 const clientSessions = require("client-sessions");
 
 const app = express(); // constructor
-const HTTP_PORT = 3000;
+const HTTP_PORT = process.env.PORT || 3000;
 
 const authData = require("./modules/auth-service");
 
