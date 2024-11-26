@@ -39,6 +39,7 @@ const main = async () => {
     app.use(express.static(path.join(__dirname, "/public")));
     app.use(express.urlencoded({ extended: true }));
 
+    // set up client sessions
     app.use(
       clientSessions({
         cookieName: "session",
@@ -47,14 +48,11 @@ const main = async () => {
         activeDuration: 1000 * 60, // the session will be extended by this many ms each request (1 minute)
       })
     );
+
     app.use((req, res, next) => {
-      res.locals.session = req.session;
+      app.locals.session = req.session;
       next();
     });
-
-    app.listen(HTTP_PORT, () =>
-      console.log(`listening: http://localhost:${HTTP_PORT}/`)
-    );
   } catch (err) {
     console.log(`unable to start server: ${err}`);
   }
@@ -224,6 +222,10 @@ const main = async () => {
       message: "I'm sorry, we're unable to find what you're looking for.",
     });
   });
+
+  app.listen(HTTP_PORT, () =>
+    console.log(`listening: http://localhost:${HTTP_PORT}/`)
+  );
 
   // app.get("/solutions/projects/sector-demo", async (req, res) => {
   //   try {
