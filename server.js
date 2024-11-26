@@ -28,31 +28,31 @@ const ensureLogin = (req, res, next) => {
   }
 };
 
+app.set("view engine", "ejs");
+app.set("views", __dirname + "/views");
+
+app.use(express.static(path.join(__dirname, "/public")));
+app.use(express.urlencoded({ extended: true }));
+
+// set up client sessions
+app.use(
+  clientSessions({
+    cookieName: "session",
+    secret: process.env.SECRET,
+    duration: 2 * 60 * 1000, // duration of the session in milliseconds (2 minutes)
+    activeDuration: 1000 * 60, // the session will be extended by this many ms each request (1 minute)
+  })
+);
+
+app.use((req, res, next) => {
+  app.locals.session = req.session;
+  next();
+});
+
 const main = async () => {
   try {
     await projectData.Initialize();
     await authData.Initialize();
-
-    app.set("view engine", "ejs");
-    app.set("views", __dirname + "/views");
-
-    app.use(express.static(path.join(__dirname, "/public")));
-    app.use(express.urlencoded({ extended: true }));
-
-    // set up client sessions
-    app.use(
-      clientSessions({
-        cookieName: "session",
-        secret: process.env.SECRET,
-        duration: 2 * 60 * 1000, // duration of the session in milliseconds (2 minutes)
-        activeDuration: 1000 * 60, // the session will be extended by this many ms each request (1 minute)
-      })
-    );
-
-    app.use((req, res, next) => {
-      app.locals.session = req.session;
-      next();
-    });
   } catch (err) {
     console.log(`unable to start server: ${err}`);
   }
