@@ -1,12 +1,14 @@
 /********************************************************************************
- * BTI325 – Assignment 02
+ * BTI325 – Assignment 06
  *
  * I declare that this assignment is my own work in accordance with Seneca's
  * Academic Integrity Policy:
  *
  * https://www.senecapolytechnic.ca/about/policies/academic-integrity-policy.html
  *
- * Name: Thai Zyong Nguyen  Student ID: 153467220 Date: Sep 22, 2024
+ * Name: Thai Zyong Nguyen  Student ID: 153467220 Date: Nov 28, 2024
+ *
+ * Published: https://random-1.vercel.app/
  *
  ********************************************************************************/
 
